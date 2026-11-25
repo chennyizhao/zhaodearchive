@@ -1,9 +1,8 @@
-.aesthetic-entry {
-  justify-self: end;
-  padding: 7px 0;
-  font-size: 13px;
-  text-underline-offset: 3px;
-}
+.controls:has(.aesthetic-entry) { width: clamp(250px, 22vw, 310px); }
+.control-row:has(.aesthetic-entry) { grid-template-columns: minmax(0, 1fr) auto auto; }
+.control-row .aesthetic-entry { width: auto; padding-inline: 10px; text-decoration: none; white-space: nowrap; }
+.control-row .aesthetic-entry:hover { background: var(--selected); }
+.aesthetic-index-link { text-align: center; text-decoration: none; white-space: nowrap; }
 .drawing-index, .drawing-detail {
   width: min(1160px, calc(100% - 2 * var(--gutter)));
   margin: 40px auto 100px;
@@ -56,6 +55,12 @@
 .drawing-actions p { margin: 0; }
 
 @media (max-width: 760px) {
+  .controls:has(.aesthetic-entry) { width: clamp(168px, 53vw, 260px); }
+  .control-row:has(.aesthetic-entry) { grid-template-columns: minmax(56px, 1fr) minmax(0, auto) auto; }
+  .control-row:has(.aesthetic-entry) :is(select, a, button) { font-size: 13px; }
+  .control-row:has(.aesthetic-entry) select { padding-right: 24px; }
+  .control-row .aesthetic-entry { min-width: 0; padding-inline: 4px; overflow: hidden; text-overflow: ellipsis; }
+  .control-row:has(.aesthetic-entry) .language-switch { min-width: 36px; padding-inline: 6px; }
   .drawing-wall { columns: 2; }
 }
 @media (max-width: 480px) {

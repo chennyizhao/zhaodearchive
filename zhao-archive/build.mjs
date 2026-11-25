@@ -210,9 +210,9 @@ function home(cases, showAesthetic) {
           ${text('span', 'Project category', '案例分类', ' class="sr-only"')}
           <select id="category">${categories.map(category => text('option', category, categoryLabels[category], ` value="${category}"`)).join('')}</select>
         </label>
+        ${showAesthetic ? text('a', 'Aesthetic Archive', '审美积累', ' class="aesthetic-entry" href="aesthetic/index.html" data-page-link') : ''}
         ${languageButton}
       </div>
-      ${showAesthetic ? text('a', 'Aesthetic Archive', '审美积累', ' class="aesthetic-entry" href="aesthetic/index.html" data-page-link') : ''}
     </div>
   </header>
   <main class="archive" aria-labelledby="archive-title">
