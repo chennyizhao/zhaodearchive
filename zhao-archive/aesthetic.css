@@ -1,0 +1,63 @@
+.aesthetic-entry {
+  justify-self: end;
+  padding: 7px 0;
+  font-size: 13px;
+  text-underline-offset: 3px;
+}
+.drawing-index, .drawing-detail {
+  width: min(1160px, calc(100% - 2 * var(--gutter)));
+  margin: 40px auto 100px;
+}
+.drawing-index h1 {
+  margin: 0 0 22px;
+  font-size: clamp(31px, 5vw, 58px);
+  font-weight: 500;
+  letter-spacing: -.04em;
+}
+.drawing-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  border-bottom: 1px solid #aeaeae;
+  margin-bottom: 22px;
+}
+.drawing-filters button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 6px 0 8px;
+  background: transparent;
+  color: var(--quiet);
+}
+.drawing-filters button[aria-pressed="true"] { color: var(--ink); border-color: currentColor; }
+.drawing-message { color: var(--quiet); font-size: 14px; line-height: 1.6; }
+.drawing-wall { columns: 3; column-gap: 16px; list-style: none; margin: 0; padding: 0; }
+.drawing-wall li { break-inside: avoid; margin: 0 0 16px; }
+.drawing-wall a, .drawing-wall img { display: block; }
+.drawing-wall img { width: 100%; height: auto; }
+.drawing-placeholder { display: block; aspect-ratio: 4 / 3; border: 1px solid #d4d4d4; background: #e7e7e7; }
+.drawing-wall li:nth-child(3n + 2) .drawing-placeholder { aspect-ratio: 3 / 4; }
+.drawing-wall li:nth-child(3n + 3) .drawing-placeholder { aspect-ratio: 1; }
+.drawing-detail { margin-top: 18px; }
+.drawing-stage {
+  display: grid;
+  place-items: center;
+  height: clamp(290px, 69dvh, 900px);
+  overflow: auto;
+  background: #e7e7e7;
+}
+.drawing-stage img { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: contain; }
+.drawing-stage[data-actual-size] { place-items: start; }
+.drawing-stage[data-actual-size] img { width: auto; height: auto; }
+.drawing-actions, .drawing-steps { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+.drawing-actions { margin-top: 16px; }
+.drawing-actions a, .drawing-actions button { font-size: 14px; text-underline-offset: 4px; }
+.drawing-actions [aria-disabled="true"] { color: var(--quiet); text-decoration: none; }
+.drawing-actions button { padding: 5px 9px; border: 1px solid #aeaeae; background: transparent; }
+.drawing-actions p { margin: 0; }
+
+@media (max-width: 760px) {
+  .drawing-wall { columns: 2; }
+}
+@media (max-width: 480px) {
+  .drawing-wall { columns: 1; }
+}

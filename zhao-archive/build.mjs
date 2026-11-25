@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { buildAesthetic } from './aesthetic.mjs';
 
 const project = import.meta.dirname;
 const workspace = path.dirname(project);
@@ -165,7 +166,7 @@ function dateInEnglish(value) {
     .replace(/(\d{4})\s*年/g, '$1');
 }
 
-function shell({ title, titleZh, description, prefix, bodyClass, content, script = '' }) {
+function shell({ title, titleZh, description, prefix, bodyClass, content, script = '', stylesheet = '' }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -174,6 +175,7 @@ function shell({ title, titleZh, description, prefix, bodyClass, content, script
   <meta name="description" content="${e(description)}">
   ${text('title', title, titleZh)}
   <link rel="stylesheet" href="${prefix}styles.css">
+  ${stylesheet ? `<link rel="stylesheet" href="${prefix}${stylesheet}">` : ''}
   <script src="${prefix}locale.js" defer></script>
   ${script}
 </head>
@@ -184,7 +186,7 @@ ${content}
 `;
 }
 
-function home(cases) {
+function home(cases, showAesthetic) {
   const data = cases.map(item => ({
     slug: item.slug, title: item.title, localTitle: item.localTitle,
     artist: item.artist, localArtist: item.architect.local, artistKey: item.artistKey, year: item.designYear ?? '',
@@ -197,6 +199,7 @@ function home(cases) {
   return shell({
     title: 'Zhao Archive', titleZh: 'Zhao Archive · 建筑档案', description: 'A personal archive of architectural projects and drawings.',
     prefix: '', bodyClass: 'home-page',
+    stylesheet: showAesthetic ? 'aesthetic.css' : '',
     script: '<script src="archive.js" defer></script>',
     content: `  <header class="home-header">
     <a class="wordmark" href="./index.html" data-page-link>Zhao Archive</a>
@@ -209,6 +212,7 @@ function home(cases) {
         </label>
         ${languageButton}
       </div>
+      ${showAesthetic ? text('a', 'Aesthetic Archive', '审美积累', ' class="aesthetic-entry" href="aesthetic/index.html" data-page-link') : ''}
     </div>
   </header>
   <main class="archive" aria-labelledby="archive-title">
@@ -371,8 +375,10 @@ for (const item of cases) {
 if (jobs.length) await makePreviews(jobs);
 const clientFiles = ['styles.css', 'locale.js', 'archive.js', 'gallery.js'];
 if (previewMode) clientFiles.push('personal-notes.js');
+const showAesthetic = await buildAesthetic({ dist, previewMode, shell, e, text, languageButton, photoDimensions, makePreviews });
+if (showAesthetic) clientFiles.push('aesthetic.css', 'aesthetic.js');
 await Promise.all([
-  writeFile(path.join(dist, 'index.html'), home(cases)),
+  writeFile(path.join(dist, 'index.html'), home(cases, showAesthetic)),
   ...clientFiles.map(file => copyFile(path.join(project, file), path.join(dist, file))),
 ]);
 console.log(`Built ${cases.length} cases at ${path.join(dist, 'index.html')}`);
