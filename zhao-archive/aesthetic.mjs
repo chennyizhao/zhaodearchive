@@ -56,7 +56,14 @@ export async function buildAesthetic({ dist, previewMode, shell, e, text, langua
   const card = drawing => `<li id="${drawing.id}" data-category="${drawing.category}"><a href="${detailPath(drawing.id)}" aria-label="${e(drawing.titleEn)}" data-zh-label="${e(drawing.title)}">
     ${drawing.image ? picture(drawing, `media/${drawing.id}-preview.jpg`, 'loading="lazy" decoding="async"') : '<span class="drawing-placeholder" aria-hidden="true"></span>'}
   </a></li>`;
-  const list = heading('../', text('a', 'Index', '建筑档案', ' class="aesthetic-index-link" href="../index.html" data-page-link')) + `
+  const configuredUpload = process.env.ZHAO_ARCHIVE_AESTHETIC_UPLOAD_URL;
+  const onlineUpload = configuredUpload ? URL.parse(configuredUpload) : null;
+  if (configuredUpload && (onlineUpload?.protocol !== 'https:' || onlineUpload.username || onlineUpload.password)) {
+    throw new Error('ZHAO_ARCHIVE_AESTHETIC_UPLOAD_URL must be an HTTPS administrator link.');
+  }
+  const uploadHref = previewMode ? 'upload/' : onlineUpload?.href;
+  const uploadLink = uploadHref ? text('a', 'Upload', '上传图纸', ` class="aesthetic-index-link" href="${e(uploadHref)}"`) : '';
+  const list = heading('../', text('a', 'Index', '建筑档案', ' class="aesthetic-index-link" href="../index.html" data-page-link') + uploadLink) + `
   <main class="drawing-index" aria-labelledby="aesthetic-heading">
     ${text('h1', 'Aesthetic Archive', '审美积累', ' id="aesthetic-heading"')}
     <div class="drawing-filters" role="group" aria-label="Categories" data-zh-label="分类" hidden>

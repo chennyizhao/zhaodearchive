@@ -1,0 +1,35 @@
+:root { font-family: 'Helvetica Neue', Helvetica, Arial, 'Microsoft YaHei', sans-serif; color: #161616; background: #f0f0f0; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+header, main { width: min(920px, calc(100% - 40px)); margin-inline: auto; }
+header { padding: 24px 0 0; }
+main { margin-block: 38px 70px; }
+a { color: inherit; text-underline-offset: 4px; }
+h1 { margin: 0 0 28px; font-size: clamp(34px, 6vw, 54px); font-weight: 500; letter-spacing: -.04em; }
+h2 { font-size: 20px; font-weight: 500; }
+form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 26px; }
+#uploader { align-self: start; border: 1px dashed #a4a4a4; padding: 20px; background: #e7e7e7; }
+#uploader[data-dragging] { background: #ddd; border-color: #383838; }
+#uploader p, #draft-status, #upload-status { color: #505050; font-size: 13px; line-height: 1.6; }
+#uploader label { display: block; margin-bottom: 12px; }
+#image-file { max-width: 100%; }
+#image-preview { display: block; width: 100%; max-height: 360px; object-fit: contain; }
+[hidden] { display: none !important; }
+.fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-content: start; }
+.wide { grid-column: 1 / -1; }
+label { display: grid; gap: 5px; font-size: 14px; }
+input, select, button { font: inherit; color: inherit; }
+.fields input:not([type='checkbox']), select, button { border: 1px solid #aaa; border-radius: 0; background: #f7f7f7; padding: 6px 9px; min-height: 34px; }
+.fields input, select { width: 100%; }
+.check, .submit { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.check input { width: auto; }
+button { cursor: pointer; }
+button:not(:disabled):hover { background: #e2e2e2; }
+:focus-visible { outline: 2px solid #181818; outline-offset: 3px; }
+section { margin-top: 50px; border-top: 1px solid #aaa; }
+#draft-list { padding: 0; list-style: none; }
+#draft-list li { display: grid; grid-template-columns: 82px 1fr; gap: 16px; align-items: start; border-top: 1px solid #ccc; padding: 10px 0; }
+#draft-list img { width: 82px; height: 72px; object-fit: contain; background: #e7e7e7; }
+#draft-list p { margin: 0 0 5px; overflow-wrap: anywhere; }
+#draft-list a { font-size: 13px; }
+@media (max-width: 630px) { form { grid-template-columns: 1fr; } }

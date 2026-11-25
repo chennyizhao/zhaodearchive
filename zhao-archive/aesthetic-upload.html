@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>上传图纸 · Zhao Archive</title>
+  <link rel="stylesheet" href="upload.css">
+  <script src="upload.js" defer></script>
+</head>
+<body>
+  <header><a href="../index.html">返回审美积累</a></header>
+  <main>
+    <h1>上传图纸</h1>
+    <form id="draft-form" method="post" action="api/drafts" enctype="multipart/form-data">
+      <div id="uploader" tabindex="0" aria-labelledby="upload-label" aria-describedby="upload-help">
+        <label id="upload-label" for="image-file">选择图片</label>
+        <input type="file" id="image-file" name="image" accept="image/jpeg,image/png">
+        <p id="upload-help">也可以拖入图片，或按 Ctrl+V 粘贴。JPG 或 PNG，单张最多 20 MB。</p>
+        <img id="image-preview" alt="待上传图纸预览" hidden>
+        <p id="filename" hidden></p>
+      </div>
+      <div class="fields">
+        <label class="wide">收藏条目
+          <select name="entry"><option value="">新增图纸</option></select>
+        </label>
+        <label>图纸名称<input name="title" maxlength="150" required></label>
+        <label>分类
+          <select name="category" required>
+            <option value="analysis">分析图</option>
+            <option value="fragments">项目碎片</option>
+            <option value="others">其他</option>
+          </select>
+        </label>
+        <label class="wide">分享原帖<input name="postUrl" type="url" maxlength="2048" placeholder="https://"></label>
+        <label class="wide">原始出处<input name="sourceUrl" type="url" maxlength="2048" placeholder="https://"></label>
+        <label class="wide">作者或署名<input name="credit" maxlength="180"></label>
+        <label class="wide check"><input type="checkbox" name="rights" value="yes">我确认这张图可在公开网站展示</label>
+        <div class="wide submit"><button type="submit">保存草稿</button><span id="upload-status" role="status"></span></div>
+      </div>
+    </form>
+    <section aria-labelledby="draft-heading">
+      <h2 id="draft-heading">已保存的草稿</h2>
+      <p id="draft-status" role="status"></p>
+      <ul id="draft-list"></ul>
+    </section>
+  </main>
+</body>
+</html>

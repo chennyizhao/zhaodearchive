@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { buildAesthetic } from './aesthetic.mjs';
+import { photoDimensions } from './image-info.mjs';
 
 const project = import.meta.dirname;
 const workspace = path.dirname(project);
@@ -44,29 +45,6 @@ function sourceLinks(section = '') {
 
 function safeName(value) {
   return value && value !== '.' && value !== '..' && !/[\\/:]/.test(value);
-}
-
-async function photoDimensions(file) {
-  const bytes = await readFile(file);
-  if (bytes.length > 24 && bytes.toString('ascii', 1, 4) === 'PNG') {
-    return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
-  }
-  if (bytes[0] === 0xff && bytes[1] === 0xd8) {
-    for (let offset = 2; offset + 9 < bytes.length && bytes[offset] === 0xff;) {
-      const marker = bytes[offset + 1];
-      if (marker === 0xff) {
-        offset += 1;
-        continue;
-      }
-      if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
-        return { width: bytes.readUInt16BE(offset + 7), height: bytes.readUInt16BE(offset + 5) };
-      }
-      const size = bytes.readUInt16BE(offset + 2);
-      if (marker === 0xda || size < 2) break;
-      offset += 2 + size;
-    }
-  }
-  throw new Error(`Cannot read dimensions for ${file}`);
 }
 
 async function loadCase(slug) {
