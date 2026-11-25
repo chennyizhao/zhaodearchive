@@ -7,7 +7,9 @@
     "postUrl": "https://www.xiaohongshu.com/discovery/item/6ac3c698000000001a020c2d",
     "postedBy": "三文鱼呼吸舱",
     "imageNumber": 1,
-    "permission": "pending"
+    "credit": "分享账号 · 三文鱼呼吸舱",
+    "file": "salmon-portfolio-01.png",
+    "permission": "approved"
   },
   {
     "id": "salmon-portfolio-03",
@@ -17,7 +19,9 @@
     "postUrl": "https://www.xiaohongshu.com/discovery/item/6ac3c698000000001a020c2d",
     "postedBy": "三文鱼呼吸舱",
     "imageNumber": 3,
-    "permission": "pending"
+    "credit": "分享账号 · 三文鱼呼吸舱",
+    "file": "salmon-portfolio-03.png",
+    "permission": "approved"
   },
   {
     "id": "altan-exploded-axonometric-01",
