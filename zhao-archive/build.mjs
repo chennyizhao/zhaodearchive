@@ -4,7 +4,8 @@ import path from 'node:path';
 
 const project = import.meta.dirname;
 const workspace = path.dirname(project);
-const dist = path.join(project, 'dist');
+const previewMode = process.argv.includes('--preview');
+const dist = path.join(project, previewMode ? 'preview-dist' : 'dist');
 const edits = JSON.parse(await readFile(path.join(project, 'edits.json'), 'utf8'));
 const categoryLabels = {
   ALL: '全部', STRUCTURE: '结构', LIGHT: '光线', SCALE: '尺度',
@@ -121,7 +122,8 @@ async function loadCase(slug) {
     localTitle: title.local, artist, artistKey: artist.toLowerCase(), architect, author, authorEn: edit.authorEn,
     location, locationEn: edit.locationEn, designYear, designPeriod, completion,
     tags, localTags, source: { label: source[1], english: edit.sourceEn, url: source[2] },
-    notes, notesEn: edit.notesEn ?? [], assets, gallery, preview,
+    notes, notesEn: edit.notesEn ?? [], personalNote: sections.个人笔记 ?? '',
+    assets, gallery, preview,
     position: edit.position ?? '50% 50%',
   };
 }
@@ -210,6 +212,23 @@ function home(cases) {
   });
 }
 
+function personalNotes(item) {
+  if (!item.personalNote && !previewMode) return '';
+
+  return `
+    <section id="personal-notes" class="record-section notes" aria-labelledby="personal-notes-heading">
+      ${text('h2', 'Personal notes', '个人笔记', ' id="personal-notes-heading"')}
+      <p class="personal-note" lang="zh-CN"${item.personalNote ? '' : ' hidden'}>${e(item.personalNote)}</p>
+      ${previewMode ? `<form class="personal-note-editor" data-case="${e(item.slug)}" hidden>
+        ${text('label', 'Edit personal notes', '编辑个人笔记', ' for="personal-note-draft"')}
+        <textarea id="personal-note-draft" rows="5" aria-describedby="personal-note-help">\n${e(item.personalNote)}</textarea>
+        ${text('p', 'Drafts are saved in this browser.', '草稿保存在当前浏览器。', ' id="personal-note-help"')}
+        ${text('button', 'Save local draft', '保存本机草稿', ' type="submit"')}
+        <p class="draft-status" role="status"></p>
+      </form>` : ''}
+    </section>`;
+}
+
 function detail(item) {
   const prefix = '../../';
   const filePrefix = `${prefix}assets/${urlPart(item.slug)}/`;
@@ -236,7 +255,8 @@ function detail(item) {
   });
   return shell({
     title: `${item.title} — Zhao Archive`, titleZh: `${item.localTitle} — Zhao Archive`, description: item.notesEn[0] ?? item.notes[0],
-    prefix, bodyClass: 'detail-page', script: '<script src="../../gallery.js" defer></script>',
+    prefix, bodyClass: 'detail-page',
+    script: `<script src="${prefix}gallery.js" defer></script>${previewMode ? `\n  <script src="${prefix}personal-notes.js" defer></script>` : ''}`,
     content: `  <header class="detail-header">
     <a class="wordmark" href="../../index.html" data-page-link>Zhao Archive</a>
     <div class="detail-controls">
@@ -261,10 +281,10 @@ ${figures.join('\n')}
         ` href="${e(item.source.url)}"${item.source.english ? '' : ' lang="zh-CN"'}`)}
     </section>
     <section class="record-section notes" aria-labelledby="notes-heading">
-      ${text('h2', 'Learning notes', '学习笔记', ' id="notes-heading"')}
+      ${text('h2', 'Project features', '案例特点', ' id="notes-heading"')}
       ${item.notes.map((note, index) => text('p', item.notesEn[index] ?? note, note,
         item.notesEn[index] ? '' : ' lang="zh-CN"')).join('\n      ')}
-    </section>
+    </section>${personalNotes(item)}
   </main>
   <dialog id="image-viewer" class="image-viewer" aria-label="Enlarged image" data-zh-label="图片放大查看">
     <div class="viewer-toolbar">
@@ -318,8 +338,10 @@ for (const item of cases) {
   jobs.push({ source: path.join(item.assets, item.preview), destination: path.join(previews, `${item.slug}.jpg`) });
 }
 await makePreviews(jobs);
+const clientFiles = ['styles.css', 'locale.js', 'archive.js', 'gallery.js'];
+if (previewMode) clientFiles.push('personal-notes.js');
 await Promise.all([
   writeFile(path.join(dist, 'index.html'), home(cases)),
-  ...['styles.css', 'locale.js', 'archive.js', 'gallery.js'].map(file => copyFile(path.join(project, file), path.join(dist, file))),
+  ...clientFiles.map(file => copyFile(path.join(project, file), path.join(dist, file))),
 ]);
 console.log(`Built ${cases.length} cases at ${path.join(dist, 'index.html')}`);

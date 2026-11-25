@@ -17,9 +17,9 @@
 *, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; }
 a { color: inherit; }
-button, input, select { color: inherit; font: inherit; }
+button, input, select, textarea { color: inherit; font: inherit; }
 button { cursor: pointer; }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: 1px solid var(--ink);
   outline-offset: -2px;
 }
@@ -277,6 +277,29 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .source, .notes { margin-top: 60px; }
 .source a { text-underline-offset: 4px; }
 .notes p { max-width: 43em; line-height: 1.8; }
+.personal-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+.personal-note-editor { max-width: 43em; display: grid; gap: 10px; }
+.personal-note-editor label, .personal-note-editor p { font-size: 14px; }
+.personal-note-editor textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #aeaeae;
+  border-radius: 0;
+  background: var(--selected);
+  line-height: 1.6;
+  resize: vertical;
+}
+.personal-note-editor p { margin: 0; color: var(--quiet); }
+.personal-note-editor button {
+  justify-self: start;
+  padding: 6px 12px;
+  border: 1px solid #aeaeae;
+  border-radius: 0;
+  background: transparent;
+  font-size: 14px;
+}
+.personal-note-editor button:hover { background: var(--selected); }
+.personal-note-editor .draft-status:empty { display: none; }
 .image-viewer {
   border: 0;
   margin: auto;
