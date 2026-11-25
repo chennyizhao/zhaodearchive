@@ -125,7 +125,8 @@
         input.value = '';
         choose();
       }
-      status.textContent = '草稿已保存。';
+      status.textContent = result.previewUpdated === true ? '草稿已保存，审美积累预览已更新。'
+        : result.previewUpdated === false ? '草稿已保存，预览更新失败。' : '草稿已保存。';
       await refresh();
     } catch (error) {
       status.textContent = error.message || '草稿保存失败。';

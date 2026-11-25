@@ -6,6 +6,7 @@ import { imageInfo } from './image-info.mjs';
 
 const project = import.meta.dirname;
 export const uploadMount = '/zhaodearchive/aesthetic/upload/';
+const localDraftFolder = path.join(project, '.aesthetic-drafts');
 const maxImage = 20 * 1024 * 1024;
 const maxRequest = maxImage + 128 * 1024;
 const draftId = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
@@ -65,7 +66,18 @@ async function readUpload(request) {
     .catch(() => { throw new UploadError(400, '图片表单未完整收到，请重新上传。'); });
 }
 
-export function createAestheticUploadHandler({ origin, password, draftFolder = path.join(project, '.aesthetic-drafts') }) {
+const readDraft = async (root, id) => JSON.parse(await readFile(path.join(root, id, 'draft.json'), 'utf8'));
+
+export async function readAestheticDrafts(root = localDraftFolder) {
+  const dirs = await readdir(root, { withFileTypes: true }).catch(error => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  const drafts = await Promise.all(dirs.filter(dir => dir.isDirectory() && draftId.test(dir.name)).map(dir => readDraft(root, dir.name)));
+  return drafts.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export function createAestheticUploadHandler({ origin, password, draftFolder = localDraftFolder, onDraftSaved }) {
   const address = new URL(origin);
   const local = address.protocol === 'http:' && address.hostname === '127.0.0.1';
   if (address.origin !== origin || (!local && (address.protocol !== 'https:' || typeof password !== 'string' || password.length < 24))) {
@@ -74,16 +86,10 @@ export function createAestheticUploadHandler({ origin, password, draftFolder = p
   const root = path.resolve(draftFolder);
   const authorization = password ? digest(`Basic ${Buffer.from(`admin:${password}`, 'utf8').toString('base64')}`) : null;
   const entries = async () => JSON.parse(await readFile(path.join(project, 'aesthetic-collection.json'), 'utf8'));
-  const draft = async id => JSON.parse(await readFile(path.join(root, id, 'draft.json'), 'utf8'));
 
   async function state() {
-    const dirs = await readdir(root, { withFileTypes: true }).catch(error => {
-      if (error.code === 'ENOENT') return [];
-      throw error;
-    });
-    const drafts = await Promise.all(dirs.filter(dir => dir.isDirectory() && draftId.test(dir.name)).map(dir => draft(dir.name)));
     return { entries: (await entries()).map(({ id, title, category, sourceUrl, postUrl }) => ({ id, title, category, sourceUrl, postUrl })),
-      drafts: drafts.sort((a, b) => b.createdAt.localeCompare(a.createdAt)) };
+      drafts: await readAestheticDrafts(root) };
   }
 
   async function save(request) {
@@ -138,7 +144,18 @@ export function createAestheticUploadHandler({ origin, password, draftFolder = p
     try {
       if (route === 'api/drafts' && method === 'POST') {
         if (request.headers.origin !== origin) throw new UploadError(403, '请从本上传页面提交图片。');
-        json(response, 201, { draft: await save(request) });
+        const data = await save(request);
+        let previewUpdated;
+        if (onDraftSaved) {
+          try {
+            await onDraftSaved();
+            previewUpdated = true;
+          } catch (error) {
+            console.error('Aesthetic preview rebuild failed:', error.code ?? error.name);
+            previewUpdated = false;
+          }
+        }
+        json(response, 201, { draft: data, previewUpdated });
       } else if (method !== 'GET' && method !== 'HEAD') {
         json(response, 405, { error: '请求方式不支持。' });
       } else if (pages.has(route)) {
@@ -150,7 +167,7 @@ export function createAestheticUploadHandler({ origin, password, draftFolder = p
       } else {
         const id = route.match(/^api\/drafts\/([^/]+)\/image$/)?.[1];
         if (!id || !draftId.test(id)) throw new UploadError(404, '找不到该草稿。');
-        const data = await draft(id);
+        const data = await readDraft(root, id);
         response.writeHead(200, { ...headers, 'Content-Type': data.type, 'Content-Length': data.size });
         if (method === 'HEAD') response.end();
         else createReadStream(path.join(root, id, 'image')).on('error', error => response.destroy(error)).pipe(response);

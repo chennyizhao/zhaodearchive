@@ -1,7 +1,9 @@
+import { execFile } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import path from 'node:path';
+import { promisify } from 'node:util';
 import { createAestheticUploadHandler } from './aesthetic-upload.mjs';
 
 const mount = '/zhaodearchive/';
@@ -25,7 +27,13 @@ if (!(await stat(path.join(root, 'index.html')).catch(() => null))?.isFile()) {
 }
 
 const notFound = response => response.writeHead(404).end('Not found.');
-const handleUpload = createAestheticUploadHandler({ origin: `http://${host}:${port}` });
+const run = promisify(execFile);
+let previewBuild = Promise.resolve();
+const rebuildPreview = () => {
+  previewBuild = previewBuild.catch(() => {}).then(() => run(process.execPath, [path.join(import.meta.dirname, 'build.mjs'), '--preview']));
+  return previewBuild;
+};
+const handleUpload = createAestheticUploadHandler({ origin: `http://${host}:${port}`, onDraftSaved: rebuildPreview });
 
 createServer(async (request, response) => {
   if (await handleUpload(request, response)) return;

@@ -9,7 +9,7 @@ node zhao-archive/build.mjs --preview
 node zhao-archive/serve-preview.mjs
 ```
 
-打开 [上传图纸](http://127.0.0.1:4173/zhaodearchive/aesthetic/upload/)，选文件、拖入或粘贴 JPG、PNG。单张上限 20 MB。补齐条目时，从「收藏条目」选择对应图片，名称、分类和原帖会自动带入。保存草稿后，可以刷新查看并下载原图。
+打开 [上传图纸](http://127.0.0.1:4173/zhaodearchive/aesthetic/upload/)，选文件、拖入或粘贴 JPG、PNG。单张上限 20 MB。补齐条目时，从「收藏条目」选择对应图片，名称、分类和原帖会自动带入。保存后草稿可预览和下载。本地上传服务会更新「审美积累」预览，返回即可看到草稿。手动构建 `--preview` 也会读取已保存的本机草稿。
 
 本地服务只监听 `127.0.0.1`。每份草稿的原图和资料保存在 `zhao-archive/.aesthetic-drafts/`，这个目录在 Git 跟踪及站点产物之外。换浏览器但仍使用同一个服务时，已保存的草稿仍可查看。
 

@@ -1,5 +1,6 @@
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { readAestheticDrafts } from './aesthetic-upload.mjs';
 
 const project = import.meta.dirname;
 const categories = {
@@ -9,8 +10,21 @@ const categories = {
 const validUrl = value => /^https?:\/\/[^\s]+$/i.test(value ?? '');
 const detailPath = id => `drawings/${id}/index.html`;
 
+function previewDrawing(draft, entry) {
+  const asset = `upload/api/drafts/${encodeURIComponent(draft.id)}/image`;
+  return {
+    id: entry?.id ?? `draft-${draft.id}`,
+    title: draft.title, titleEn: entry?.title === draft.title ? entry.titleEn : draft.title,
+    category: draft.category, credit: draft.credit || entry?.credit,
+    sourceUrl: draft.sourceUrl || entry?.sourceUrl, postUrl: draft.postUrl || entry?.postUrl,
+    width: draft.width, height: draft.height, original: asset, thumbnail: asset, localDraft: true,
+  };
+}
+
 export async function buildAesthetic({ dist, previewMode, shell, e, text, languageButton, photoDimensions, makePreviews }) {
   const collection = JSON.parse(await readFile(path.join(project, 'aesthetic-collection.json'), 'utf8'));
+  const drafts = previewMode ? await readAestheticDrafts() : [];
+  const latest = new Map(drafts.toReversed().filter(draft => draft.entryId).map(draft => [draft.entryId, draft]));
   const ids = new Set();
   const drawings = [];
   for (const entry of collection) {
@@ -21,7 +35,9 @@ export async function buildAesthetic({ dist, previewMode, shell, e, text, langua
       throw new Error(`Invalid aesthetic entry: ${entry.id}`);
     }
     ids.add(entry.id);
-    if (entry.permission === 'approved') {
+    if (latest.has(entry.id)) {
+      drawings.push(previewDrawing(latest.get(entry.id), entry));
+    } else if (entry.permission === 'approved') {
       if (!/^[^\\/:]+\.(?:jpe?g|png)$/i.test(entry.file ?? '')) {
         throw new Error(`Missing image for approved aesthetic entry: ${entry.id}`);
       }
@@ -31,6 +47,9 @@ export async function buildAesthetic({ dist, previewMode, shell, e, text, langua
     } else if (previewMode) {
       drawings.push(entry);
     }
+  }
+  for (const draft of drafts.toReversed()) {
+    if (!ids.has(draft.entryId)) drawings.push(previewDrawing(draft));
   }
   const section = path.resolve(dist, 'aesthetic');
   if (path.dirname(section) !== path.resolve(dist)) throw new Error('Invalid aesthetic output path.');
@@ -54,7 +73,7 @@ export async function buildAesthetic({ dist, previewMode, shell, e, text, langua
   });
   const picture = (drawing, src, extra = '') => `<img src="${src}" alt="${e(drawing.titleEn)}" data-zh-alt="${e(drawing.title)}" width="${drawing.width}" height="${drawing.height}" ${extra}>`;
   const card = drawing => `<li id="${drawing.id}" data-category="${drawing.category}"><a href="${detailPath(drawing.id)}" aria-label="${e(drawing.titleEn)}" data-zh-label="${e(drawing.title)}">
-    ${drawing.image ? picture(drawing, `media/${drawing.id}-preview.jpg`, 'loading="lazy" decoding="async"') : '<span class="drawing-placeholder" aria-hidden="true"></span>'}
+    ${drawing.original ? picture(drawing, drawing.thumbnail ?? `media/${drawing.id}-preview.jpg`, 'loading="lazy" decoding="async"') : '<span class="drawing-placeholder" aria-hidden="true"></span>'}
   </a></li>`;
   const configuredUpload = process.env.ZHAO_ARCHIVE_AESTHETIC_UPLOAD_URL;
   const onlineUpload = configuredUpload ? URL.parse(configuredUpload) : null;
@@ -69,7 +88,8 @@ export async function buildAesthetic({ dist, previewMode, shell, e, text, langua
     <div class="drawing-filters" role="group" aria-label="Categories" data-zh-label="分类" hidden>
       ${Object.entries(categories).map(([key, labels]) => text('button', ...labels, ` type="button" data-filter="${key}" aria-pressed="${key === 'all'}"`)).join('')}
     </div>
-    ${previewMode && media.length < drawings.length ? text('p', 'Preview includes drawings awaiting images.', '预览中含待上传图纸。', ' class="drawing-message"') : ''}
+    ${previewMode && drawings.some(drawing => drawing.localDraft) ? text('p', 'Local drafts are visible in this preview.', '当前预览包含本机草稿。', ' class="drawing-message"') : ''}
+    ${previewMode && drawings.some(drawing => !drawing.original) ? text('p', 'Preview includes drawings awaiting images.', '预览中含待上传图纸。', ' class="drawing-message"') : ''}
     <ul class="drawing-wall">${drawings.map(card).join('')}</ul>
     ${text('p', 'No drawings in this category.', '此分类暂无图纸。', ' id="drawing-empty" class="drawing-message" role="status" hidden')}
   </main>`;
@@ -96,14 +116,15 @@ export async function buildAesthetic({ dist, previewMode, shell, e, text, langua
     <main class="drawing-detail" data-drawing-category="${drawing.category}" data-drawing-id="${drawing.id}" aria-labelledby="drawing-heading">
       ${text('h1', drawing.titleEn, drawing.title, ' id="drawing-heading" class="sr-only"')}
       <div class="drawing-stage">
-        ${drawing.image ? picture(drawing, `../../${drawing.original}`, 'id="drawing-image"') : text('p', 'Image pending. Check the shared post for the selected image.', '图纸待上传，可在分享原帖查看所选图片。', ' class="drawing-message"')}
+        ${drawing.original ? picture(drawing, `../../${drawing.original}`, 'id="drawing-image"') : text('p', 'Image pending. Check the shared post for the selected image.', '图纸待上传，可在分享原帖查看所选图片。', ' class="drawing-message"')}
       </div>
       <div class="drawing-actions">
         ${previousNext}
-        ${drawing.image ? '<button id="drawing-zoom" type="button" aria-pressed="false" hidden>Actual size</button>' : ''}
+        ${drawing.original ? '<button id="drawing-zoom" type="button" aria-pressed="false" hidden>Actual size</button>' : ''}
         ${drawing.sourceUrl ? text('a', 'Original source', '原始来源', ` href="${e(drawing.sourceUrl)}"`) : ''}
-        ${!drawing.sourceUrl ? text('a', 'Shared post', '分享原帖', ` href="${e(drawing.postUrl)}"`) : ''}
-        ${previewMode && !drawing.image ? `<p class="drawing-message">${e(drawing.postedBy)} · ${text('span', 'Image', '图')} ${drawing.imageNumber}</p>` : ''}
+        ${!drawing.sourceUrl && drawing.postUrl ? text('a', 'Shared post', '分享原帖', ` href="${e(drawing.postUrl)}"`) : ''}
+        ${drawing.localDraft ? text('p', 'Local draft', '本机草稿', ' class="drawing-message"') : ''}
+        ${previewMode && !drawing.original ? `<p class="drawing-message">${e(drawing.postedBy)} · ${text('span', 'Image', '图')} ${drawing.imageNumber}</p>` : ''}
         ${drawing.credit ? `<p class="drawing-message">${e(drawing.credit)}</p>` : ''}
       </div>
     </main>`;
