@@ -57,7 +57,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .home-header > * { pointer-events: auto; }
 .controls { display: grid; gap: 5px; width: clamp(180px, 17vw, 238px); }
 .control-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px; }
-.controls input, .controls select, .language-switch {
+.controls input, .controls select, .language-switch, .aesthetic-entry, .aesthetic-index-link {
   display: block;
   width: 100%;
   min-height: 31px;
@@ -70,8 +70,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   letter-spacing: -.18px;
 }
 .controls input::placeholder { color: var(--quiet); opacity: 1; }
-.language-switch { width: auto; min-width: 52px; padding-inline: 10px; }
-.language-switch:hover { background: var(--selected); }
+.language-switch, .aesthetic-index-link { width: auto; min-width: 52px; padding-inline: 10px; }
+.language-switch:hover, .aesthetic-index-link:hover { background: var(--selected); }
 .category-control { position: relative; }
 .category-control::after {
   content: "";
@@ -229,6 +229,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .preview-card:not([data-depth="current"]) { pointer-events: none; }
 .preview-card img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.preview-title {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 12%;
+  color: var(--ink);
+  background: #e0e0e0;
+  font-size: clamp(12px, 1.8vw, 24px);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
 @starting-style {
   .preview-card[data-depth="current"] { transform: translateY(9%) scale(.88); filter: blur(4px); opacity: .75; }
   .preview-card:not([data-depth="current"]) { opacity: 0; }
@@ -276,6 +287,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .drawing figcaption { margin: 10px 0 0; color: var(--quiet); font-size: 14px; }
 .source, .notes { margin-top: 60px; }
 .source a { text-underline-offset: 4px; }
+.reference-list { padding-inline-start: 1.25em; line-height: 1.9; }
+.reference-list a { text-underline-offset: 4px; }
 .notes p { max-width: 43em; line-height: 1.8; }
 .personal-note { white-space: pre-wrap; overflow-wrap: anywhere; }
 .personal-note-editor { max-width: 43em; display: grid; gap: 10px; }
