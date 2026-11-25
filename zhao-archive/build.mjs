@@ -281,7 +281,7 @@ ${figures.join('\n')}
         ` href="${e(item.source.url)}"${item.source.english ? '' : ' lang="zh-CN"'}`)}
     </section>
     <section class="record-section notes" aria-labelledby="notes-heading">
-      ${text('h2', 'Learning notes', '学习笔记', ' id="notes-heading"')}
+      ${text('h2', 'Project features', '案例特点', ' id="notes-heading"')}
       ${item.notes.map((note, index) => text('p', item.notesEn[index] ?? note, note,
         item.notesEn[index] ? '' : ' lang="zh-CN"')).join('\n      ')}
     </section>${personalNotes(item)}
