@@ -34,6 +34,13 @@ function localized(value) {
   return match ? { local: match[1], english: match[2] } : { local: value, english: '' };
 }
 
+function sourceLinks(section = '') {
+  return [...section.matchAll(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g)].map(([, label, url]) => {
+    const { local, english } = localized(label);
+    return { label: local, english, url };
+  });
+}
+
 function safeName(value) {
   return value && value !== '.' && value !== '..' && !/[\\/:]/.test(value);
 }
@@ -77,10 +84,11 @@ async function loadCase(slug) {
   const designPeriod = fields.get('设计周期') ?? fields.get('设计年份') ?? '';
   const designYear = designPeriod.match(yearPattern)?.[0];
   const completion = fields.get('建成年份') ?? fields.get('建设周期') ?? fields.get('年份');
-  const source = sections.源网站网址?.match(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/);
+  const sources = sourceLinks(sections.源网站网址);
+  const mediaReferences = sourceLinks(sections.图纸与照片索引);
   const notes = sections.笔记?.split(/\r?\n\s*\r?\n/).map(line => line.trim()).filter(Boolean);
 
-  if (!title.local || !architect.local || !location || !source || !notes?.length) {
+  if (!title.local || !architect.local || !location || !sources.length || !notes?.length) {
     throw new Error(`${slug}: 请补全项目名称、建筑师、地点、原网站链接和笔记。`);
   }
   if ([...notes.join('').replace(/\s/g, '')].length > 200) {
@@ -88,6 +96,12 @@ async function loadCase(slug) {
   }
 
   const edit = edits[slug] ?? {};
+  if (edit.sourceEn) sources[0].english = edit.sourceEn;
+  const details = listItems(sections.项目数据).map(line => {
+    const separator = line.indexOf('：');
+    if (separator < 1) throw new Error(`${slug}: 项目数据缺少字段或冒号。`);
+    return [localized(line.slice(0, separator).trim()), localized(line.slice(separator + 1).trim())];
+  });
   const rawTags = listItems(sections.项目分类);
   const tags = [...new Set([...rawTags.map(tag => translated.get(tag) ?? tag), ...(edit.extraCategories ?? [])])]
     .filter(tag => categories.slice(1).includes(tag));
@@ -95,7 +109,11 @@ async function loadCase(slug) {
   const folder = edit.folder ?? fields.get('素材目录') ?? slug;
   if (!safeName(folder)) throw new Error(`${slug}: 素材目录需为档案库下的单个文件夹名。`);
   const assets = path.join(workspace, '档案库', folder);
-  const files = (await readdir(assets, { withFileTypes: true }))
+  const assetEntries = await readdir(assets, { withFileTypes: true }).catch(error => {
+    if (error.code === 'ENOENT' && mediaReferences.length) return [];
+    throw error;
+  });
+  const files = assetEntries
     .filter(file => file.isFile() && imageExtension.test(file.name)).map(file => file.name)
     .sort(englishOrder.compare);
   const listed = listItems(sections.图库).map(line => {
@@ -109,7 +127,7 @@ async function loadCase(slug) {
     if (!ordered.has(file)) ordered.set(file, { file });
   }
   const preview = fields.get('首页图片') ?? ordered.keys().next().value;
-  if (!files.includes(preview)) {
+  if (preview ? !files.includes(preview) : !mediaReferences.length) {
     throw new Error(`${slug}: 请在素材目录中提供有效的 JPG 或 PNG 首页图片。`);
   }
   const gallery = await Promise.all([...ordered.values()].map(async image => ({
@@ -121,7 +139,7 @@ async function loadCase(slug) {
     slug, title: title.english || edit.titleEn || title.local,
     localTitle: title.local, artist, artistKey: artist.toLowerCase(), architect, author, authorEn: edit.authorEn,
     location, locationEn: edit.locationEn, designYear, designPeriod, completion,
-    tags, localTags, source: { label: source[1], english: edit.sourceEn, url: source[2] },
+    tags, localTags, sources, mediaReferences, details,
     notes, notesEn: edit.notesEn ?? [], personalNote: sections.个人笔记 ?? '',
     assets, gallery, preview,
     position: edit.position ?? '50% 50%',
@@ -173,7 +191,7 @@ function home(cases) {
     search: [item.title, item.localTitle, item.artist, item.architect.local, item.author, item.authorEn, item.slug.replaceAll('-', ' ')]
       .filter(Boolean).join(' '),
     tags: item.tags, position: item.position,
-    image: `assets/previews/${urlPart(item.slug)}.jpg`,
+    image: item.preview ? `assets/previews/${urlPart(item.slug)}.jpg` : null,
     href: `cases/${urlPart(item.slug)}/index.html`,
   }));
   return shell({
@@ -229,6 +247,14 @@ function personalNotes(item) {
     </section>`;
 }
 
+function sourceLink({ label, english, url }) {
+  return text('a', english || label, label, ` href="${e(url)}"${english ? '' : ' lang="zh-CN"'}`);
+}
+
+function referenceList(links) {
+  return `<ul class="reference-list">${links.map(link => `<li>${sourceLink(link)}</li>`).join('')}</ul>`;
+}
+
 function detail(item) {
   const prefix = '../../';
   const filePrefix = `${prefix}assets/${urlPart(item.slug)}/`;
@@ -239,6 +265,7 @@ function detail(item) {
     ['Location', '地点', item.locationEn ?? item.location, item.location],
     ['Design', '设计', dateInEnglish(item.designPeriod), item.designPeriod],
     ['Completion / Construction', '建成／建设', dateInEnglish(item.completion), item.completion],
+    ...item.details.map(([label, value]) => [label.english || label.local, label.local, value.english || value.local, value.local]),
     ['Categories', '分类', [...item.tags, ...item.localTags.map(tag => tag === '地形' ? 'TOPOGRAPHY' : tag)].join(' / '),
       [...item.tags.map(tag => categoryLabels[tag]), ...item.localTags].join(' / ')],
   ];
@@ -256,7 +283,8 @@ function detail(item) {
   return shell({
     title: `${item.title} — Zhao Archive`, titleZh: `${item.localTitle} — Zhao Archive`, description: item.notesEn[0] ?? item.notes[0],
     prefix, bodyClass: 'detail-page',
-    script: `<script src="${prefix}gallery.js" defer></script>${previewMode ? `\n  <script src="${prefix}personal-notes.js" defer></script>` : ''}`,
+    script: [item.gallery.length ? 'gallery.js' : '', previewMode ? 'personal-notes.js' : '']
+      .filter(Boolean).map(file => `<script src="${prefix}${file}" defer></script>`).join('\n  '),
     content: `  <header class="detail-header">
     <a class="wordmark" href="../../index.html" data-page-link>Zhao Archive</a>
     <div class="detail-controls">
@@ -274,11 +302,12 @@ function detail(item) {
     <section class="record-section" aria-labelledby="gallery-heading">
       ${text('h2', 'Drawings & photographs', '图纸与照片', ' id="gallery-heading"')}
 ${figures.join('\n')}
+      ${item.mediaReferences.length ? `${text('p', 'View the credited photographs and drawings at their original source.', '以下为原站照片和图纸索引，点击查看原文。')}
+      ${referenceList(item.mediaReferences)}` : ''}
     </section>
     <section class="record-section source" aria-labelledby="source-heading">
       ${text('h2', 'Original project', '项目来源', ' id="source-heading"')}
-      ${text('a', item.source.english ?? item.source.label, item.source.label,
-        ` href="${e(item.source.url)}"${item.source.english ? '' : ' lang="zh-CN"'}`)}
+      ${item.sources.length === 1 ? sourceLink(item.sources[0]) : referenceList(item.sources)}
     </section>
     <section class="record-section notes" aria-labelledby="notes-heading">
       ${text('h2', 'Project features', '案例特点', ' id="notes-heading"')}
@@ -286,7 +315,7 @@ ${figures.join('\n')}
         item.notesEn[index] ? '' : ' lang="zh-CN"')).join('\n      ')}
     </section>${personalNotes(item)}
   </main>
-  <dialog id="image-viewer" class="image-viewer" aria-label="Enlarged image" data-zh-label="图片放大查看">
+  ${item.gallery.length ? `<dialog id="image-viewer" class="image-viewer" aria-label="Enlarged image" data-zh-label="图片放大查看">
     <div class="viewer-toolbar">
       ${text('button', 'Previous', '上一张', ' type="button" id="previous-image"')}
       <span id="image-position" aria-live="polite"></span>
@@ -295,7 +324,7 @@ ${figures.join('\n')}
       ${text('button', 'Close', '关闭', ' type="button" id="close-viewer" autofocus')}
     </div>
     <div class="viewer-image-area"><img id="enlarged-image" alt=""></div>
-  </dialog>`,
+  </dialog>` : ''}`,
   });
 }
 
@@ -335,9 +364,11 @@ for (const item of cases) {
     writeFile(path.join(output, 'index.html'), detail(item)),
     ...item.gallery.map(image => copyFile(path.join(item.assets, image.file), path.join(assets, image.file))),
   ]);
-  jobs.push({ source: path.join(item.assets, item.preview), destination: path.join(previews, `${item.slug}.jpg`) });
+  if (item.preview) {
+    jobs.push({ source: path.join(item.assets, item.preview), destination: path.join(previews, `${item.slug}.jpg`) });
+  }
 }
-await makePreviews(jobs);
+if (jobs.length) await makePreviews(jobs);
 const clientFiles = ['styles.css', 'locale.js', 'archive.js', 'gallery.js'];
 if (previewMode) clientFiles.push('personal-notes.js');
 await Promise.all([

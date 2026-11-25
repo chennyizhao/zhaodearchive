@@ -76,6 +76,7 @@
   function localizePreview(card, item) {
     card.href = href(item.href);
     card.setAttribute('aria-label', text(`Open ${item.title}`, `打开${item.localTitle}`));
+    if (!item.image) card.firstElementChild.textContent = text(item.title, item.localTitle);
   }
 
   function localizeIndex() {
@@ -128,14 +129,18 @@
     let card = cards.get(item.slug);
     if (!card) {
       card = node('a', 'preview-card');
+      if (item.image) {
+        const image = new Image();
+        image.alt = '';
+        image.decoding = 'async';
+        image.fetchPriority = priority ? 'high' : 'low';
+        image.style.objectPosition = item.position;
+        image.src = item.image;
+        card.append(image);
+      } else {
+        card.append(node('span', 'preview-title'));
+      }
       localizePreview(card, item);
-      const image = new Image();
-      image.alt = '';
-      image.decoding = 'async';
-      image.fetchPriority = priority ? 'high' : 'low';
-      image.style.objectPosition = item.position;
-      image.src = item.image;
-      card.append(image);
       stack.append(card);
       cards.set(item.slug, card);
     }
