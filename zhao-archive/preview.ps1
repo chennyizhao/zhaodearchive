@@ -8,9 +8,9 @@ try {
   foreach ($job in $jobs) {
     $image = [System.Drawing.Image]::FromFile($job.source)
     try {
-      $scale = [Math]::Min(1, 680 / [Math]::Max($image.Width, $image.Height))
-      $width = [int]($image.Width * $scale)
-      $height = [int]($image.Height * $scale)
+      $scale = [Math]::Min(1.0, 680.0 / [Math]::Max($image.Width, $image.Height))
+      $width = [Math]::Max(1, [int]($image.Width * $scale))
+      $height = [Math]::Max(1, [int]($image.Height * $scale))
       $bitmap = New-Object System.Drawing.Bitmap $width, $height
       try {
         $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
