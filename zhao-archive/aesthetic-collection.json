@@ -31,6 +31,44 @@
     "postUrl": "https://www.xiaohongshu.com/discovery/item/68805c4b0000000023006b16",
     "postedBy": "Altan.",
     "imageNumber": 1,
-    "permission": "pending"
+    "permission": "approved",
+    "credit": "分享账号 · Altan.",
+    "file": "altan-exploded-axonometric-01.png"
+  },
+  {
+    "id": "elevation-6b04f169",
+    "title": "立面",
+    "titleEn": "Elevation",
+    "category": "fragments",
+    "postUrl": "https://www.xiaohongshu.com/discovery/item/6b04f1690000000026011859?source=webshare&xhsshare=pc_web&xsec_token=ABxDcsRYhb6eckVVWDXtlUnPmSfHd2zguQoCwsKpI1iTc=&xsec_source=pc_share",
+    "file": "elevation-6b04f169.png",
+    "permission": "approved"
+  },
+  {
+    "id": "user-group-analysis-6b0384bc",
+    "title": "人群分析",
+    "titleEn": "User Group Analysis",
+    "category": "analysis",
+    "postUrl": "https://www.xiaohongshu.com/discovery/item/6b0384bc000000002a0248af?source=webshare&xhsshare=pc_web&xsec_token=AB3wJBzsEXWObfVjrs9NoPc2ockCFT8ZAZowEGw6P-E7E=&xsec_source=pc_share",
+    "file": "user-group-analysis-6b0384bc.png",
+    "permission": "approved"
+  },
+  {
+    "id": "mapping-6b027976",
+    "title": "mapping",
+    "titleEn": "Mapping",
+    "category": "analysis",
+    "postUrl": "https://www.xiaohongshu.com/discovery/item/6b027976000000002a0184dd?source=webshare&xhsshare=pc_web&xsec_token=ABvfKtG-DoxaXvEDvfUQNg53PGTssqgTUp8bera6Lbt6o=&xsec_source=pc_share",
+    "file": "mapping-6b027976.png",
+    "permission": "approved"
+  },
+  {
+    "id": "site-location-analysis-6b05afef",
+    "title": "区位分析",
+    "titleEn": "Site Location Analysis",
+    "category": "analysis",
+    "postUrl": "https://www.xiaohongshu.com/discovery/item/6b05afef0000000024033e8c?source=webshare&xhsshare=pc_web&xsec_token=ABCZ6ZUi5Qy4ik36WPjsDP0kxagnLBRJYqx4KfA6D70d4=&xsec_source=pc_share",
+    "file": "site-location-analysis-6b05afef.png",
+    "permission": "approved"
   }
 ]
