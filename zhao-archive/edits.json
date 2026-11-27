@@ -202,5 +202,107 @@
         "altEn": "Sketch of the neighborhood’s spatial relationships"
       }
     ]
+  },
+  "komaeyu": {
+    "locationEn": "Komae, Tokyo, Japan",
+    "notesEn": [
+      "Komaeyu occupies the ground floor of a residential building. The renovation connects the former street-front pub and the baths behind it through a reception counter, bar and tiled Mount Fuji wall. The neighboring vacant lot provides a place to sit after bathing. Three sizes of green tiles from Tajimi share aligned joints, making the variation subtle and connecting the interior palette with the surrounding greenery."
+    ],
+    "gallery": [
+      {
+        "file": "01-street-counter.jpg",
+        "alt": "向街打开的柜台与外侧停留区 · 摄影 Ju Yeon Lee",
+        "altEn": "Street-facing counter and outdoor seating · Photo by Ju Yeon Lee"
+      },
+      {
+        "file": "02-wash-area.jpg",
+        "alt": "绿釉砖围合的洗浴区 · 摄影 Ju Yeon Lee",
+        "altEn": "Washing area lined in green tile · Photo by Ju Yeon Lee"
+      },
+      {
+        "file": "03-site-plan.jpg",
+        "alt": "总平面图 · Schemata Architects",
+        "altEn": "Site plan · Schemata Architects"
+      },
+      {
+        "file": "04-floor-plan.jpg",
+        "alt": "首层平面图 · Schemata Architects",
+        "altEn": "Ground-floor plan · Schemata Architects"
+      },
+      {
+        "file": "05-sections.jpg",
+        "alt": "两条剖面 · Schemata Architects",
+        "altEn": "Two sections · Schemata Architects"
+      }
+    ]
+  },
+  "koganeyu": {
+    "locationEn": "Sumida, Tokyo, Japan",
+    "notesEn": [
+      "The renovation kept the existing bathing areas at their original size and reused redundant service rooms for new uses, including a sauna, an open-air cold bath and a bar. A 2.25-metre partition between the two bathing areas sets the material datum below the exposed concrete structure. At the entrance it drops to 1.15 metres, aligning with the bar counter where visitors can meet."
+    ],
+    "gallery": [
+      {
+        "file": "01-street-front.jpg",
+        "alt": "沿街入口与明亮的接待区 · 摄影 Yurika Kono",
+        "altEn": "Street entrance and lit reception area · Photo by Yurika Kono"
+      },
+      {
+        "file": "02-floor-plan.jpg",
+        "alt": "平面图 · Schemata Architects",
+        "altEn": "Floor plan · Schemata Architects"
+      },
+      {
+        "file": "03-section.jpg",
+        "alt": "剖面图 · Schemata Architects",
+        "altEn": "Section · Schemata Architects"
+      }
+    ]
+  },
+  "kamegaike-onsen": {
+    "locationEn": "Ikata, Ehime, Japan",
+    "notesEn": [
+      "After a lightning fire, the main building was rebuilt on the surviving substructure with a lightweight timber frame. Clerestories between the staggered roofs bring light into the shared areas. The raised timber ceiling and translucent surfaces are visible beside the shoe lockers and children’s play area. Deep eaves shelter the transition outdoors, while seating, dining and overnight accommodation support the onsen’s community role."
+    ],
+    "gallery": [
+      {
+        "file": "01-shoe-lockers-and-play-area.jpg",
+        "alt": "鞋柜及儿童活动区 · 摄影西川公朗",
+        "altEn": "Shoe lockers and children’s play area · Photo by Masao Nishikawa"
+      }
+    ]
+  },
+  "therme-vals": {
+    "locationEn": "Vals, Graubünden, Switzerland",
+    "notesEn": [
+      "The baths are set halfway into the slope, with turf-covered roofs continuing the ground above. Inside, layered local stone ties together the finishes and walls, while massive blocks define bathing spaces of different sizes. Slits between the roof slabs cast light onto stone and water. The route alternates between dim, low passages, open pools and smaller rooms for lingering."
+    ],
+    "gallery": [
+      {
+        "file": "01-site-plan.jpg",
+        "alt": "总平面图与山坡等高线",
+        "altEn": "Site plan and hillside contours"
+      },
+      {
+        "file": "02-interior.png",
+        "alt": "石墙、水面和顶光 · 图像资料《Peter Zumthor Therme Vals》",
+        "altEn": "Stone walls, water and top light · Image reference: Peter Zumthor Therme Vals"
+      },
+      {
+        "file": "03-bathing-level-plan.jpg",
+        "alt": "浴场层平面",
+        "altEn": "Bathing-level plan"
+      },
+      {
+        "file": "04-plan.jpg",
+        "alt": "平面图",
+        "altEn": "Floor plan drawing"
+      },
+      {
+        "file": "05-section.png",
+        "alt": "剖面图",
+        "altEn": "Section drawing"
+      }
+    ]
   }
 }
